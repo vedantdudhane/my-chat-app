@@ -20,7 +20,7 @@ export const AuthProvider = ({ children }) => {
             const { data } = await axios.get("/api/auth/check");
             if (data.success) {
                 setAuthUser(data.user);
-                console.log("User restored:", data.user); // Debug log
+                console.log("User restored:", data.user);
                 connectSocket(data.user);
             } else {
                 setAuthUser(null);
@@ -46,7 +46,7 @@ export const AuthProvider = ({ children }) => {
                 setToken(data.token);
                 localStorage.setItem("token", data.token);
                 connectSocket(data.userData);
-                console.log("User logged in:", data.userData); // Debug log
+                console.log("User logged in:", data.userData);
                 toast.success(data.message);
             } else {
                 toast.error(data.message);
@@ -60,21 +60,25 @@ export const AuthProvider = ({ children }) => {
     // Logout function to handle user logout and socket disconnection
     const logout = async () => {
         try {
-            await axios.post("/api/auth/logout");
+            console.log("Token sent in logout request:", axios.defaults.headers.common["token"]);
+            const response = await axios.post("/api/auth/logout");
+            console.log("Logout response:", response.data);
             localStorage.removeItem("token");
             setToken(null);
             setAuthUser(null);
             setOnlineusers([]);
             axios.defaults.headers.common["token"] = null;
-            if (socket) {
+            if (socket && socket.connected) {
                 socket.disconnect();
                 setSocket(null);
             }
-            console.log("User logged out"); // Debug log
+            console.log("User logged out");
             toast.success("Logged out successfully");
+            return true;
         } catch (error) {
-            console.error("Logout error:", error.message);
-            toast.error("Logout failed");
+            console.error("Logout error:", error.response?.data || error.message);
+            toast.error("Logout failed: " + (error.response?.data?.message || error.message));
+            return false;
         }
     };
 
@@ -115,9 +119,9 @@ export const AuthProvider = ({ children }) => {
         setSocket(newSocket);
         newSocket.on("getOnlineUsers", (userIds) => {
             setOnlineusers(userIds);
-            console.log("Online users:", userIds); // Debug log
+            console.log("Online users:", userIds);
         });
-        console.log("Socket connected for user:", userData._id); // Debug log
+        console.log("Socket connected for user:", userData._id);
     };
 
     useEffect(() => {
@@ -127,7 +131,7 @@ export const AuthProvider = ({ children }) => {
         } else {
             setAuthUser(null);
             setOnlineusers([]);
-            if (socket) socket.disconnect();
+            if (socket && socket.connected) socket.disconnect();
             setSocket(null);
         }
     }, [token]);

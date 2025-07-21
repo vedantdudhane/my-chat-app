@@ -37,7 +37,15 @@ const Sidebar = () => {
                                 Edit Profile
                             </p>
                             <hr className="my-2 border-t border-gray-600" />
-                            <p onClick={() => logout()} className="cursor-pointer text-sm">
+                            <p
+                                onClick={async () => {
+                                    const success = await logout();
+                                    if (success) {
+                                        navigate("/login");
+                                    }
+                                }}
+                                className="cursor-pointer text-sm"
+                            >
                                 Log out
                             </p>
                         </div>
@@ -60,7 +68,10 @@ const Sidebar = () => {
                 ) : (
                     filteredUsers.map((user, index) => (
                         <div
-                            onClick={() => {setSelectedUser(user); setUnseenMessages(prev=>({...prev,[user._id]:0}))}}
+                            onClick={() => {
+                                setSelectedUser(user);
+                                setUnseenMessages((prev) => ({ ...prev, [user._id]: 0 }));
+                            }}
                             key={index}
                             className={`relative flex items-center gap-2 p-2 pl-4 rounded cursor-pointer max-sm:text-sm ${
                                 selectedUser?._id === user._id && "bg-[#282142]/50"
