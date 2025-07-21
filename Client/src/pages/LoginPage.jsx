@@ -2,7 +2,7 @@ import React from 'react'
 import assets from '../assets/assets'
 import { useState } from 'react'
 import { useContext } from 'react'
-import { AuthContext } from '../../context/AuthContext'
+import { AuthContext } from '../../context/AuthContext.jsx'
 
 const LoginPage = () => {
     const [currState, SetcurrState] = useState("Sign up")
